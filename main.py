@@ -10,11 +10,16 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 
 from tqdm import tqdm
 
 PAGE_LOAD_WAIT = 2  # seconds
+ELEMENT_LOAD_TIMEOUT = 5  # seconds
 EXTENSION_DOWNLOAD_WAIT = 2  # seconds
 REMOTE_DRIVER_URL = os.getenv("REMOTE_DRIVER_URL", None)
 
@@ -40,26 +45,39 @@ def downloadExtension(url, driver):
     # print(f"Waiting for page to load: {url}")
     time.sleep(PAGE_LOAD_WAIT)
 
-    driver.execute_script("window.scrollTo(0, 200)")
+    driver.execute_script("window.scrollTo(0, 400)")
+
+    print("Wait for right sidebar")
+    wait = WebDriverWait(driver=driver, timeout=ELEMENT_LOAD_TIMEOUT)
+    wait.until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, "div.resources-async-div"))
+    )
 
     try:
         elem = driver.find_element_by_xpath(
             '//button[normalize-space()="Download Extension"]'
         )
     except NoSuchElementException as e:
-        # Hover on Download Extension span
+        print("Trying dropdown method when downloading")
+
+        # Click on Download Extension div
         download_extension_dropdown = driver.find_element_by_xpath(
-            '//span[normalize-space()="Download Extension"]'
+            '//div[normalize-space()="Download Extension"]'
         )
-        hov = ActionChains(driver).move_to_element(download_extension_dropdown)
-        hov.perform()
+
+        ## Hover is not working anymore
+        # hov = ActionChains(driver).move_to_element(download_extension_dropdown)
+        # hov.perform()
+        download_extension_dropdown.click()
 
         # wait some moment
         time.sleep(0.5)
         # click on OS button
-        elem = driver.find_element_by_xpath(
-            '//li[@id="item-details-download-dropdown-list" and normalize-space()="Windows x64" ]'
-        )
+        try:
+            elem = driver.find_element_by_xpath('//button[@name="Windows x64"]')
+        except NoSuchElementException as e:
+            print(f"Cannot find download button for {url}")
+            pass
 
     elem.click()
     # print("Waiting for download")

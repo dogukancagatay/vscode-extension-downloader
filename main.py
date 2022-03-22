@@ -22,6 +22,7 @@ PAGE_LOAD_WAIT = 2  # seconds
 ELEMENT_LOAD_TIMEOUT = 5  # seconds
 EXTENSION_DOWNLOAD_WAIT = 2  # seconds
 REMOTE_DRIVER_URL = os.getenv("REMOTE_DRIVER_URL", None)
+OS_LABEL="Windows x64"
 
 
 def getExtensionListOld():
@@ -47,7 +48,7 @@ def downloadExtension(url, driver):
 
     driver.execute_script("window.scrollTo(0, 400)")
 
-    print("Wait for right sidebar")
+    # print("Wait for right sidebar")
     wait = WebDriverWait(driver=driver, timeout=ELEMENT_LOAD_TIMEOUT)
     wait.until(
         EC.visibility_of_element_located((By.CSS_SELECTOR, "div.resources-async-div"))
@@ -58,7 +59,7 @@ def downloadExtension(url, driver):
             '//button[normalize-space()="Download Extension"]'
         )
     except NoSuchElementException as e:
-        print("Trying dropdown method when downloading")
+        # print("Trying dropdown method when downloading")
 
         # Click on Download Extension div
         download_extension_dropdown = driver.find_element_by_xpath(
@@ -74,7 +75,7 @@ def downloadExtension(url, driver):
         time.sleep(0.5)
         # click on OS button
         try:
-            elem = driver.find_element_by_xpath('//button[@name="Windows x64"]')
+            elem = driver.find_element_by_xpath(f'//button[@name="{OS_LABEL}"]')
         except NoSuchElementException as e:
             print(f"Cannot find download button for {url}")
             pass

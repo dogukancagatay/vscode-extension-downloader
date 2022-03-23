@@ -1,5 +1,12 @@
 version: "3"
 services:
+  app:
+    build: .
+    depends_on:
+      - selenium
+    volumes:
+      - ./extension-list.txt:/app/extension-list.txt
+
   selenium:
     image: selenium/standalone-chrome-debug:3.141.59
     shm_size: 2g

@@ -22,23 +22,24 @@ PAGE_LOAD_WAIT = 2  # seconds
 ELEMENT_LOAD_TIMEOUT = 5  # seconds
 EXTENSION_DOWNLOAD_WAIT = 2  # seconds
 REMOTE_DRIVER_URL = os.getenv("REMOTE_DRIVER_URL", None)
-OS_LABEL="Windows x64"
-
-
-def getExtensionListOld():
-    command = ["code", "--list-extensions"]
-    output = check_output(command).decode("utf-8")
-    extensionList = output.split("\n")
-    return extensionList
-
+OS_LABEL = os.getenv("OS_LABEL", "Windows x64")
 
 def getExtensionList():
+    return getExtensionListFromFile()
+
+def getExtensionListFromVSCode():
     command = "code --list-extensions"
     with Popen(command, stdout=PIPE, stderr=None, shell=True) as process:
         output = process.communicate()[0].decode("utf-8")
         extensionList = output.split("\n")
         return extensionList
 
+def getExtensionListFromFile():
+    extList = []
+    with open("extension-list.txt", "r", encoding="UTF-8") as f:
+        for line in f:
+            extList.append(line.strip("\n\t\r "))
+    return extList
 
 def downloadExtension(url, driver):
     driver.get(url)
